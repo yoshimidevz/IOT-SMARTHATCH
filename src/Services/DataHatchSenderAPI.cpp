@@ -1,7 +1,7 @@
-#include "DataHortaSenderApi.h"
+#include "DataHatchSenderApi.h"
 
-void DataHortaSenderApi::sendAPI(float umidade_solo, float umidade_ar, float temp_ar, String status_luz) {
-    String url_in = "http://85.31.63.241:8082/inserirHorta";
+void DataHortaSenderApi::sendAPI(float ultrassonic, float fotoresistor, String status_luz) {
+    String url_in = "http://85.31.63.241:8082/dadosEscotilha";
 
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
@@ -9,9 +9,8 @@ void DataHortaSenderApi::sendAPI(float umidade_solo, float umidade_ar, float tem
 
         http.addHeader("Content-Type", "application/json");
 
-        String jsonPayload = "{\"umidade_solo\":" + String(umidade_solo) + ","
-                             "\"umidade_ar\":" + String(umidade_ar) + ","
-                             "\"temperatura_ar\":" + String(temp_ar) + ","
+        String jsonPayload = "{\"ultrassonic\":" + String(ultrassonic) + ","
+                             "\"fotoresistor\":" + String(fotoresistor) + ","
                              "\"luz_ambiente\":\"" + status_luz + "\"}";
 
         int httpResponseCode = http.POST(jsonPayload);
