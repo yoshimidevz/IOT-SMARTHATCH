@@ -2,13 +2,15 @@
 #include <HCSR04.h>
 #include <BH1750.h>
 #include <Wire.h>
+#include "Utils/WiFiManagerLib.h"
+#include "Services/DataHatchSenderAPI.h"
 
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLE2902.h>
+// #include <BLEDevice.h>
+// #include <BLEServer.h>
+// #include <BLEUtils.h>
+// #include <BLE2902.h>
 
-//Sensor ultrassônico
+//ultrassônico
 const int echoPin = 26;
 const int trigPin = 25;
 
@@ -16,9 +18,14 @@ const int pistaoDois = 19; //pistão esquerda superior
 const int pistaoUm = 18; //pistão direita inferior
 
 BH1750 lightMeter(0x23);
+WifiManager wifiConnect;
+DataHatchSenderApi sender;
 
-//BH1750 PINOUTS
-// VCC - PROTOBOARD: 08 PINOUT: 3.3V / LARANJA
+unsigned long lastSendTime = 0;
+const unsigned long sendInterval = 300; // 360000 1 hora e 300 5min
+
+
+// VCC - PROTOBOARD: 08 PINOUT: 3.3V / LARANJA 
 // GND - PROTOBOARD: 09 PINOUT: GND / PRETO
 // SCL - PROTOBOARD: 10 PINOUT: D22 / AMARELO
 // SDA - PROTOBOARD: 11 PINOUT: D21 / VERDE
@@ -38,10 +45,38 @@ float readDistance() {
   return distance;
 }
 
+float readLux(){
+  if (lightMeter.measurementReady()) {
+    float lux = lightMeter.readLightLevel();
+    // Serial.print("Light: ");
+    // Serial.print(lux);
+    // Serial.println(" lx");
+    return lux;
+  }
+}
+
+bool securitySystem(float distance, float lux){
+  bool lightOk = (lux < 100);
+  bool distanceOk = (distance > 0 && distance < 10);
+
+  if(lightOk && distanceOk){
+    Serial.println("Acionado.");
+    digitalWrite(pistaoDois, HIGH);
+    digitalWrite(pistaoUm, HIGH);
+    return true;
+  } else {
+    Serial.println("Desligado.");
+    digitalWrite(pistaoDois, LOW);
+    digitalWrite(pistaoUm, LOW);
+    return false;
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
   Wire.begin(21, 22); 
+  wifiConnect.connect();
 
   pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
@@ -58,27 +93,21 @@ void setup() {
 
 void loop() {
   float distance = readDistance();
-  Serial.print("Distância: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+  // Serial.print("Distance: ");
+  // Serial.print(distance);
+  // Serial.println(" cm");
   delay(2000);
+  float lux = readLux();
 
+  securitySystem(distance, lux);
 
-  if (lightMeter.measurementReady()) {
-    float lux = lightMeter.readLightLevel();
-    Serial.print("Light: ");
-    Serial.print(lux);
-    Serial.println(" lx");
-
-    if(lux > 100 && distance > 0 && distance < 10) {
-      Serial.println("Acionado.");
-      digitalWrite(pistaoDois, HIGH);
-      digitalWrite(pistaoUm, HIGH);
-    } else {
-      Serial.println("Desligado.");
-      digitalWrite(pistaoDois, LOW);
-      digitalWrite(pistaoUm, LOW);
-    }
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi desconectado, tentando reconectar...");
+    wifiConnect.connect();
+    delay(5000);
+  } else {
+    sender.sendAPI(1, distance, lux);
   }
-  delay(2000);
-}
+} 
+    
+  

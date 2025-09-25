@@ -1,12 +1,16 @@
-#ifndef WIFI_MANAGER_LIB_H
-#define WIFI_MANAGER_LIB_H
+#pragma once
 
-#include <WiFi.h>
 #include <WiFiManager.h>
+#include <Arduino.h>
 
-class WiFiManagerLib {
+class WifiManager {
 public:
-    void setupWiFi(const char* apName, const char* apPassword);
+    void connect() {
+        WiFiManager wm;
+        if (!wm.autoConnect("Yoshimi", "123456")) {
+            Serial.println("Failed to connect!!");
+        } else {
+            Serial.println("Successful connection!!");
+        }
+    }
 };
-
-#endif

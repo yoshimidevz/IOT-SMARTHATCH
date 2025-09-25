@@ -3,7 +3,7 @@
 #include <HTTPClient.h>
 #include <WiFi.h>
 
-class DataHortaSenderApi {
+class DataHatchSenderApi {
 public:
-    void sendAPI(float ultrassonic, float fotoresistor, String status_luz);
+    void sendAPI(int escotilhaId, float distancia, float lux);
 };

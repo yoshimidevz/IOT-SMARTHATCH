@@ -1,21 +1,30 @@
 #include "DataHatchSenderApi.h"
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <WiFi.h>
 
-void DataHortaSenderApi::sendAPI(float ultrassonic, float fotoresistor, String status_luz) {
-    String url_in = "http://85.31.63.241:8082/dadosEscotilha";
+void DataHatchSenderApi::sendAPI(int escotilhaId, float distancia, float lux) {
+    String url_in = "https://yoshimi-vazadas.tecnomaub.site/api/sensores";
 
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
         http.begin(url_in);
-
         http.addHeader("Content-Type", "application/json");
 
-        String jsonPayload = "{\"ultrassonic\":" + String(ultrassonic) + ","
-                             "\"fotoresistor\":" + String(fotoresistor) + ","
-                             "\"luz_ambiente\":\"" + status_luz + "\"}";
+        DynamicJsonDocument jsonDoc(256);
+        jsonDoc["serial_number"] = "ESP32-PORTA01";
+        jsonDoc["distancia"] = distancia;
+        jsonDoc["luz_ambiente"] = lux;
+
+        String jsonPayload;
+        serializeJson(jsonDoc, jsonPayload);
+
+        Serial.print("JSON enviado: ");
+        Serial.println(jsonPayload);
 
         int httpResponseCode = http.POST(jsonPayload);
 
-        if (httpResponseCode == 201) {
+        if (httpResponseCode == 200 || httpResponseCode == 201) {
             String payload = http.getString();
             Serial.println("Resposta da API:");
             Serial.println(payload);
