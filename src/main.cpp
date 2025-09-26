@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include "Utils/WiFiManagerLib.h"
 #include "Services/DataHatchSenderAPI.h"
+#include "Utils/TokenStorage.h"
 
 // #include <BLEDevice.h>
 // #include <BLEServer.h>
@@ -77,6 +78,18 @@ void setup() {
 
   Wire.begin(21, 22); 
   wifiConnect.connect();
+  String token = readTokenFromFlash();
+
+  if (token == "") {
+    Serial.println("Nenhum token salvo. Precisa registrar no servidor!");
+    
+    String novoToken = "TOKEN_GERADO_NO_SERVIDOR";
+    saveTokenToFlash(novoToken);
+    Serial.println("Token salvo!");
+  } else {
+    Serial.print("Token encontrado: ");
+    Serial.println(token);
+  }
 
   pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
