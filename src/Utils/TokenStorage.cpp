@@ -10,7 +10,7 @@ void saveTokenToFlash(const String &token) {
 
 String readTokenFromFlash() {
     prefs.begin("escotilha", true);
-    String t = prefs.getString("api_token", "");
+    String token = prefs.getString("api_token", "");
     prefs.end();
-    return t;
+    return token;
 }

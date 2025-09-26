@@ -5,6 +5,8 @@
 #include "Utils/WiFiManagerLib.h"
 #include "Services/DataHatchSenderAPI.h"
 #include "Utils/TokenStorage.h"
+#include "Services/DataHatchSenderAPI.h"
+#include "Services/TokenProvisioning.h"
 
 // #include <BLEDevice.h>
 // #include <BLEServer.h>
@@ -75,41 +77,39 @@ bool securitySystem(float distance, float lux){
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin(21, 22);
 
-  Wire.begin(21, 22); 
-  wifiConnect.connect();
-  String token = readTokenFromFlash();
-
-  if (token == "") {
-    Serial.println("Nenhum token salvo. Precisa registrar no servidor!");
-    
-    String novoToken = "TOKEN_GERADO_NO_SERVIDOR";
-    saveTokenToFlash(novoToken);
-    Serial.println("Token salvo!");
-  } else {
-    Serial.print("Token encontrado: ");
-    Serial.println(token);
-  }
+  WiFi.disconnect(true, true);
 
   pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
-
   pinMode(pistaoDois, OUTPUT);
   pinMode(pistaoUm, OUTPUT);
+
+  wifiConnect.connect();
 
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
     Serial.println(F("BH1750 Advanced begin"));
   } else {
     Serial.println(F("Error initialising BH1750"));
   }
+
+  String token = readTokenFromFlash();
+
+  if (token == "") {
+    Serial.println("Nenhum token salvo, provisionando...");
+    token = provisionToken("ESP32-PORTA01"); // <== Salva na variável também
+    if (token != "") {
+        Serial.print("Token provisionado: ");
+        Serial.println(token);
+    } else {
+        Serial.println("Falha ao provisionar token!");
+    }
+  }
 }
 
 void loop() {
   float distance = readDistance();
-  // Serial.print("Distance: ");
-  // Serial.print(distance);
-  // Serial.println(" cm");
-  delay(2000);
   float lux = readLux();
 
   securitySystem(distance, lux);
@@ -119,8 +119,10 @@ void loop() {
     wifiConnect.connect();
     delay(5000);
   } else {
-    sender.sendAPI(1, distance, lux);
+    sender.sendAPI(distance, lux);
   }
+
+  delay(5000);
 } 
     
   
