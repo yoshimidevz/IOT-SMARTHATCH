@@ -3,6 +3,9 @@
 
 #include <Arduino.h>
 
-String provisionToken(const String &serialNumber);
+class TokenProvisioning {
+public:
+    static String provisionToken(const String &serialNumber);
+};
 
 #endif
