@@ -5,7 +5,7 @@
 #include "Utils/TokenStorage.h"
 
 String TokenProvisioning::provisionToken(const String &serialNumber) {
-    String url = "https://yoshimi-vazadas.tecnomaub.site/api/escotilha/register-login";
+    String url = "https://212.85.19.3/api/escotilha/register-login";
 
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("WiFi não conectado.");

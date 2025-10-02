@@ -98,7 +98,7 @@ void setup() {
 
   if (token == "") {
     Serial.println("Nenhum token salvo, provisionando...");
-    token = TokenProvisioning::provisionToken("ESP32-PORTA01");
+    token = TokenProvisioning::provisionToken("ESP32-teste");
     if (token != "") {
         Serial.print("Token provisionado: ");
         Serial.println(token);
@@ -106,6 +106,7 @@ void setup() {
         Serial.println("Falha ao provisionar token!");
     }
   }
+  
 }
 
 void loop() {
