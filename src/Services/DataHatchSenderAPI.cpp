@@ -5,7 +5,7 @@
 #include "Utils/TokenStorage.h"
 
 void DataHatchSenderApi::sendAPI(float distancia, float lux) {
-    String url_in = "https://212.85.19.3/api/sensores";
+    String url_in = "https://yoshimi-vazadas.tecnomaub.site/api/sensores";
 
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("WiFi não conectado.");
@@ -15,7 +15,7 @@ void DataHatchSenderApi::sendAPI(float distancia, float lux) {
     String apiToken = readTokenFromFlash();
     if (apiToken.length() == 0) {
         Serial.println("Token não encontrado. Rode o provisionamento.");
-        return;
+    return;
     }
 
     HTTPClient http;
@@ -34,9 +34,6 @@ void DataHatchSenderApi::sendAPI(float distancia, float lux) {
 
     Serial.print("Enviando payload: ");
     Serial.println(jsonPayload);
-
-    Serial.print("Token que vai no header: ");
-    Serial.println(apiToken);
 
     int httpResponseCode = http.POST(jsonPayload);
 
